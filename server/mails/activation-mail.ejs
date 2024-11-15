@@ -88,14 +88,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Welcome to Our Platform!</h1>
+            <h1>Welcome to Our LMS!</h1>
         </div>
         <div class="content">
             <h2>Activate Your Account</h2>
-            <p>Hi <%= name %>,</p>
+            <p>Hi <%= user.name %>,</p>
             <p>Thank you for registering. Click the button below to activate your account:</p>
-            <!-- <a href="<%= activationLink %>" class="btn">Activate Account</a> -->
-             <p>Your activation code is : <%= activationCode %></p>
+            <p>Your activation code is: <%= activationCode || "N/A" %></p>
             <p>If you did not sign up for this account, please ignore this email.</p>
         </div>
         <div class="footer">
