@@ -1,9 +1,12 @@
+require("dotenv").config();
 import mongoose, {Document, Model, Schema} from "mongoose";
 import bcrypt from "bcryptjs";
+import  Jwt  from "jsonwebtoken";
 
 const emailRegexPattern : RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export interface User extends Document{
+    _id: string
     name: string;
     email: string;
     password: string;
@@ -15,6 +18,8 @@ export interface User extends Document{
     isVerified: boolean;
     courses: Array<{courseId: string}>;
     comparePassword: (password: string)=> Promise<boolean>;
+    SignAccessToken: ()=> string;
+    SignRefreshToken: ()=> string;
 };
 const userSchema: Schema<User> = new mongoose.Schema({
     name: {
@@ -56,6 +61,19 @@ const userSchema: Schema<User> = new mongoose.Schema({
         }
     ]
 },{timestamps: true});
+
+
+// sign access token 
+
+userSchema.methods.SignAccessToken = function(){
+    return Jwt.sign({id: this._id}, process.env.ACCESS_TOKEN || '')
+}
+
+// sign refresh token 
+
+userSchema.methods.SignRefreshToken = function(){
+    return Jwt.sign({id: this._id}, process.env.REFRESH_TOKEN || '')
+}
 
 
 // hashe password 
