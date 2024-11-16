@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login and Logout</title>
+  <script>
+    // Function to handle login
+    async function login() {
+      const credentials = {
+        username: "exampleUser", // Replace with actual username
+        password: "examplePassword" // Replace with actual password
+      };
+
+      try {
+        const response = await fetch("http://localhost:8080/api/v1/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(credentials)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert("Login successful!");
+        } else {
+          alert(`Login failed: ${result.message}`);
+        }
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    }
+
+    // Function to handle logout
+    async function logout() {
+      try {
+        const response = await fetch("http://localhost:8080/api/v1/logout", {
+          method: "POST"
+        });
+
+        if (response.ok) {
+          alert("Logout successful!");
+        } else {
+          alert("Logout failed!");
+        }
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Login and Logout</h1>
+  <button onclick="login()">Login</button>
+  <button onclick="logout()">Logout</button>
+</body>
+</html>

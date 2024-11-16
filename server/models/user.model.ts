@@ -66,13 +66,17 @@ const userSchema: Schema<User> = new mongoose.Schema({
 // sign access token 
 
 userSchema.methods.SignAccessToken = function(){
-    return Jwt.sign({id: this._id}, process.env.ACCESS_TOKEN || '')
+    return Jwt.sign({id: this._id}, process.env.ACCESS_TOKEN || '',{
+        expiresIn: '5m'
+    })
 }
 
 // sign refresh token 
 
 userSchema.methods.SignRefreshToken = function(){
-    return Jwt.sign({id: this._id}, process.env.REFRESH_TOKEN || '')
+    return Jwt.sign({id: this._id}, process.env.REFRESH_TOKEN || '',{
+        expiresIn: '3d'
+    })
 }
 
 
