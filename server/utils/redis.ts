@@ -14,6 +14,6 @@ require("dotenv").config();
 import { Redis } from '@upstash/redis'
 
 export const redis = new Redis({
-  url: 'https://firm-jaybird-27481.upstash.io',
-  token: 'AWtZAAIjcDE1ZTJlNzBjOTJjMTA0NjFmYjhkZTVhZmY4Y2VjNzg5ZHAxMA',
+  url: process.env.REDIS_URL,
+  token: process.env.REDIS_TOKEN,
 });
