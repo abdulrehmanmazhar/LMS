@@ -17,7 +17,7 @@ app.use(cookieParser());
 // cors
 
 app.use(cors({
-    origin: process.env.ORIGINS,
+    origin: process.env.NODE_ENV === 'production' ? process.env.ORIGINS : '*',
     credentials: true
 }))
 
