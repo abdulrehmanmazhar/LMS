@@ -10,7 +10,8 @@ import sendMail from "../utils/sendMail";
 import { accessTokenOptions, refreshTokenOptions, sendToken } from "../utils/jwt";
 import {redis} from "../utils/redis"
 import { getUserById } from "../services/user.service";
-
+// import cloudinary from "cloudinary"
+import {v2 as cloudinary} from "cloudinary"
 // register user 
 
 interface RegistrationBody{
@@ -306,7 +307,40 @@ interface IUpdateProfilePicture {
     avatar: string
 }
 export const updateProfilePicture = CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
+    const {avatar} = req.body;
+    const userId = req.user?._id
+    const user = await userModel.findById(req.user?._id)
+
     try {
+       if(avatar && user){
+        if(user?.avatar?.public_id){
+            await cloudinary.uploader.destroy(user?.avatar?.public_id);
+            const myCloud = await cloudinary.uploader.upload(avatar,{
+                folder: "avatars",
+                width: 150,
+            });
+            user.avatar={
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url
+            }
+        }else{
+            const myCloud = await cloudinary.uploader.upload(avatar,{
+                folder: "avatars",
+                width: 150,
+            });
+            user.avatar={
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url
+            }
+        }
+       }
+       await user?.save()
+       await redis.set(userId, user)
+
+       res.status(200).json({
+        success: true,
+        user
+       })
         
     } catch (error) {
         
