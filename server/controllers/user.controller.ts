@@ -9,6 +9,7 @@ import path from "path";
 import sendMail from "../utils/sendMail";
 import { accessTokenOptions, refreshTokenOptions, sendToken } from "../utils/jwt";
 import {redis} from "../utils/redis"
+import { getUserById } from "../services/user.service";
 
 // register user 
 
@@ -167,11 +168,12 @@ export const updateAccessToken = CatchAsyncError(async(req: Request, res: Respon
         if(!decoded){
             return next(new ErrorHandler("Couldn't refresh token", 400))
         }
-        const session = await redis.get(decoded.id) as string
+        const session = await redis.get(decoded.id) as any;
         if(!session){
             return next(new ErrorHandler("Couldn't refresh token", 400))
         }
-        const user = JSON.parse(session)
+        // const user = JSON.parse(session)
+        const user = session;
         const accessToken = Jwt.sign ({id:user._id}, process.env.ACCESS_TOKEN , {
             expiresIn: '5m',
 
@@ -187,6 +189,41 @@ export const updateAccessToken = CatchAsyncError(async(req: Request, res: Respon
             status: "success",
             accessToken,
         })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 400));
+        
+    }
+})
+
+
+// get user info 
+export const getUserInfo = CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
+    try {
+        const userId = req.user?._id;
+        getUserById(userId, res);
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 400));
+        
+    }
+})
+
+interface ISocialBody {
+    email:string;
+    name: string;
+    avatar: string;
+}
+
+// social auth 
+export const socialAuth = CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
+    try {
+        const {email, name, avatar} = req.body as ISocialBody;
+        const user = await userModel.findOne({email});
+        if(!user){
+            const newUser = await userModel.create({email, name, avatar});
+            sendToken(newUser, 200, res);
+        }else{
+            sendToken(user, 200, res)
+        }
     } catch (error) {
         return next(new ErrorHandler(error.message, 400));
         
