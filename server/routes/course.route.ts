@@ -13,5 +13,6 @@ router.put("/add-question",isAuthenticated, addQuestion );
 router.put("/add-answer",isAuthenticated, addAnswer );
 router.put("/add-review/:id",isAuthenticated, addReview );
 router.put("/add-review-reply",isAuthenticated, authorizeRoles("admin"), addReplyToReview );
+router.put("/add-review-reply",isAuthenticated, authorizeRoles("admin"), addReplyToReview );
 
 export default router;

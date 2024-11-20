@@ -28,6 +28,7 @@ interface ICourseData extends Document{
     question: IComment[];
 }
 interface ICourse extends Document {
+    _id: string;
     name: string;
     description?: string;
     price: number;
