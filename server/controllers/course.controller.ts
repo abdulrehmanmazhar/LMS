@@ -1,15 +1,15 @@
-import express, { Request, Response, NextFunction, response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import { CatchAsyncError } from "../middleware/catchAsyncError";
 import ErrorHandler from "../utils/ErrorHandler";
 import cloudinary from "cloudinary";
-import { createCourse } from "../services/course.service";
+import { createCourse, allCoursesInDB} from "../services/course.service";
 import CourseModel from "../models/course.model";
 import { redis } from "../utils/redis";
 import mongoose from "mongoose";
 import ejs from "ejs"
 import path from "path";
 import sendMail from "../utils/sendMail";
-
+import notificationModel from "../models/notification.model";
 export const uploadCourse = CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
     try {
         const data = req.body
@@ -228,6 +228,11 @@ export const addAnswer = CatchAsyncError(async(req: Request, res: Response, next
 
         if(req.user?._id === question.user._id){
             // create a notification
+            await notificationModel.create({
+                user: req.user?._id,
+                title: "New Question",
+                message: `You have new question in ${courseContent?.title}` 
+            })
         }else{
             const data = {
                 name: question.user.name,
@@ -298,6 +303,11 @@ export const addReview = CatchAsyncError(async(req: Request, res: Response, next
         }
 
         // create notification 
+        await notificationModel.create({
+            user: req.user?._id,
+            title: "New Review",
+            message: `You have new question in ${course?.name}` 
+        })
 
         res.status(200).json({
             success: true,
@@ -347,6 +357,16 @@ export const addReplyToReview = CatchAsyncError(async(req: Request, res: Respons
         })
     } catch (error) {
         return next(new ErrorHandler(error.message, 500))
+        
+    }
+})
+// get all users for admin
+
+export const fetchAllCourses = CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
+    try {
+        allCoursesInDB(res);
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
         
     }
 })

@@ -8,15 +8,15 @@ import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
 import notificationModel from "../models/notification.model";
-import { newOrder } from "../services/order.service";
-
+import { getAllOrders, newOrder } from "../services/order.service";
+import { redis } from "../utils/redis";
 // create order 
 export const createOrder = CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
     try {
         const {courseId, payment_info, } = req.body as IOrder;
 
         const user = await userModel.findById(req.user?._id) as IUser;
-
+        const userId = req.user?._id;
         const courseExistInUser = user.courses.some((course:any)=> course._id.toString()=== courseId)
 
         if(courseExistInUser){
@@ -62,6 +62,7 @@ export const createOrder = CatchAsyncError(async(req: Request, res: Response, ne
         }
         user?.courses.push({_id:courseId});
         await user.save();
+        await redis.set(userId, JSON.stringify(user));
         const notification = await notificationModel.create({
             user: user?._id,
             title: "New Order",
@@ -71,6 +72,17 @@ export const createOrder = CatchAsyncError(async(req: Request, res: Response, ne
         await course.save()
         
         newOrder(data, res, next);
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+        
+    }
+})
+
+// get all users for admin
+
+export const fetchAllOrders = CatchAsyncError(async(req: Request, res: Response, next: NextFunction)=>{
+    try {
+        getAllOrders(res);
     } catch (error) {
         return next(new ErrorHandler(error.message, 500));
         
