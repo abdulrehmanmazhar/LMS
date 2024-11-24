@@ -4,13 +4,19 @@ import Link from 'next/link'
 import NavItems from '../utils/NavItems'
 import ThemeSwitcher from '../utils/ThemeSwitcher'
 import { HiOutlineMenuAlt3, HiOutlineUserCircle } from 'react-icons/hi'
+import CustomModel from '../utils/CustomModel'
+import Login from './auth/Login'
+import SignUp from './auth/SignUp'
+import Verification from './auth/Verification'
 type Props = {
     open: boolean;
     setOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
     activeItem: number;
+    route: string;
+    setRoute: (route: string)=> void
 }
 
-const Header:FC<Props> =({activeItem,setOpen})=> {
+const Header:FC<Props> =({activeItem,setOpen, route, setRoute, open})=> {
     const[active, setActive] = useState(false);
     const[openSlidebar, setOpenSlidebar] = useState(false);
 
@@ -63,6 +69,39 @@ const Header:FC<Props> =({activeItem,setOpen})=> {
                 )
             }
         </div>
+        {
+            route === "Login" && (
+                <>
+                {
+                    open && (
+                        <CustomModel open={open} setOpen={setOpen} activeItem={activeItem} setRoute={setRoute} component={Login}/>
+                    )
+                }
+                </>
+            )
+        }
+        {
+            route === "Sign-Up" && (
+                <>
+                {
+                    open && (
+                        <CustomModel open={open} setOpen={setOpen} activeItem={activeItem} setRoute={setRoute} component={SignUp}/>
+                    )
+                }
+                </>
+            )
+        }
+        {
+            route === "Verification" && (
+                <>
+                {
+                    open && (
+                        <CustomModel open={open} setOpen={setOpen} activeItem={activeItem} setRoute={setRoute} component={Verification}/>
+                    )
+                }
+                </>
+            )
+        }
     </div>
   )
 }
