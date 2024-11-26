@@ -1,8 +1,10 @@
 'use client'
-import React,{FC, useRef, useState} from 'react'
-import { Toast } from 'react-hot-toast'
+import React,{FC, useEffect, useRef, useState} from 'react'
+import toast, { Toast } from 'react-hot-toast'
 import { VscWorkspaceTrusted } from 'react-icons/vsc'
 import {styles} from "../../styles/style"
+import { useSelector } from 'react-redux'
+import { useActivationUserMutation } from '@/redux/features/auth/authApi'
 type Props = {
     setRoute: (route: string)=> void;
 }
@@ -13,6 +15,8 @@ type VerifyNumber = {
     "3": string;
 }
 const Verification:FC<Props> = ({setRoute}) => {
+    const {token} = useSelector((state:any)=>state.auth);
+    const [activationUser,{isSuccess, error}] = useActivationUserMutation();
     const [invalidError, setInvalidError] = useState<boolean>(false);
     const [verifyNumber, setVerifyNumber] = useState<VerifyNumber>({
         0:'',
@@ -20,6 +24,24 @@ const Verification:FC<Props> = ({setRoute}) => {
         2:'',
         3:''
     })
+
+    useEffect(()=>{
+        if(isSuccess){
+            toast.success("Account activated successfully");
+            setRoute("Login");
+        };
+        if(error){
+            if("data" in error){
+                const errorData = error as any;
+                toast.error(errorData.data.message);
+                setInvalidError(true);
+            }else{
+                console.log('An error occured', error)
+                setInvalidError(true);
+
+            }
+        }
+    },[isSuccess, error])
     const inputRefs = [
         useRef<HTMLInputElement>(null),
         useRef<HTMLInputElement>(null),
@@ -29,8 +51,17 @@ const Verification:FC<Props> = ({setRoute}) => {
     ]
 
     const verificationHandler = async() =>{
-        console.log('text');
-        setInvalidError(true)
+        // console.log('text');
+        // setInvalidError(true)
+        const verificationNumber = Object.values(verifyNumber).join("");
+        if(verificationNumber.length !== 4){
+            setInvalidError(true);
+            return
+        }
+        await activationUser({
+            activation_token: token,
+            activation_code:verificationNumber
+        })
 
     }
 
