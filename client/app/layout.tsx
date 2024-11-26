@@ -5,9 +5,11 @@ import { Providers } from "./Provider";
 import {Poppins} from 'next/font/google';
 import {Josefin_Sans} from 'next/font/google';
 import { ThemeProvider } from "./utils/theme-provider";
-import { useState, useEffect } from "react";
+import { useState, useEffect,FC } from "react";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
+import { useLoadUserQuery } from "@/redux/features/api/apiSlice";
+import Loader from "./components/loader/Loader";
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
 //   variable: "--font-geist-sans",
@@ -54,7 +56,9 @@ export default function RootLayout({
         <Providers>
         <SessionProvider>
         <ThemeProvider attribute='class' defaultTheme="system" enableSystem>
+          <Custom>
         {children}
+          </Custom>
         <Toaster position="top-center" reverseOrder={false}/>
         </ThemeProvider>
         </SessionProvider>
@@ -62,4 +66,15 @@ export default function RootLayout({
       </body>
     </html>
   );
+}
+
+const Custom:FC<{children:React.ReactNode}> =({children})=>{
+  const {isLoading} = useLoadUserQuery({})
+  return(
+    <>
+    {
+      isLoading? <Loader/> : <>{children}</>
+    }
+    </>
+  )
 }
