@@ -65,8 +65,31 @@ export const authApi = apiSlice.injectEndpoints({
                     console.error("Error during registration:", error);
                 }
             },
-        })
+        }),
+        socialAuth: builder.mutation({
+            query:({email,name, avatar})=>({
+                url: "social-auth",
+                method: "POST",
+                body:{
+                    email, name, avatar
+                },
+                credentials: "include"
+            }),
+            async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+                try {
+                    const result = await queryFulfilled;
+                    dispatch(
+                        userLoggedIn({
+                            accessToken: result.data?.accessToken,
+                            user: result.data?.user,
+                        })
+                    );
+                } catch (error) {
+                    console.error("Error during registration:", error);
+                }
+            },
+        }),
     }),
 });
 
-export const {useRegisterUserMutation,useActivationUserMutation,useLoginUserMutation} = authApi
+export const {useRegisterUserMutation,useActivationUserMutation,useLoginUserMutation,useSocialAuthMutation} = authApi

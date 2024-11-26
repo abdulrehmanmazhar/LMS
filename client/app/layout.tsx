@@ -7,6 +7,7 @@ import {Josefin_Sans} from 'next/font/google';
 import { ThemeProvider } from "./utils/theme-provider";
 import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import { SessionProvider } from "next-auth/react";
 // const geistSans = localFont({
 //   src: "./fonts/GeistVF.woff",
 //   variable: "--font-geist-sans",
@@ -51,10 +52,12 @@ export default function RootLayout({
         className={`${poppins.variable} ${josefin.variable} !bg-white bg-no-repeat dark:bg-gradient-to-b dark:from-gray-900 dark:to-black duration-300 text-black dark:text-white`}
       >
         <Providers>
+        <SessionProvider>
         <ThemeProvider attribute='class' defaultTheme="system" enableSystem>
         {children}
         <Toaster position="top-center" reverseOrder={false}/>
         </ThemeProvider>
+        </SessionProvider>
         </Providers>
       </body>
     </html>

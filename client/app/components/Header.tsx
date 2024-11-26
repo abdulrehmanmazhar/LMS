@@ -1,5 +1,5 @@
 'use client'
-import React, {FC, useState} from 'react'
+import React, {FC, useEffect, useState} from 'react'
 import Link from 'next/link'
 import NavItems from '../utils/NavItems'
 import ThemeSwitcher from '../utils/ThemeSwitcher'
@@ -8,6 +8,12 @@ import CustomModel from '../utils/CustomModel'
 import Login from './auth/Login'
 import SignUp from './auth/SignUp'
 import Verification from './auth/Verification'
+import { useSelector } from 'react-redux'
+import Image from 'next/image'
+import avatar from "../../public/avatar.png"
+import { useSession } from 'next-auth/react'
+import { useSocialAuthMutation } from '@/redux/features/auth/authApi'
+import toast from 'react-hot-toast'
 type Props = {
     open: boolean;
     setOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
@@ -19,6 +25,21 @@ type Props = {
 const Header:FC<Props> =({activeItem,setOpen, route, setRoute, open})=> {
     const[active, setActive] = useState(false);
     const[openSlidebar, setOpenSlidebar] = useState(false);
+    const {user} = useSelector((state:any)=>state.auth)
+    const {data} = useSession();
+
+    // console.log(data);
+    const [socialAuth,{isSuccess,error}] = useSocialAuthMutation();
+    useEffect(()=>{
+        if(!user){
+            if(data){
+                socialAuth({email:data?.user?.email, name:data?.user?.name, avatar:data?.user?.image})
+            }
+        }
+        if(isSuccess){
+            toast.success("Login successfully");
+        }
+    },[data, user]);
 
     if(typeof window !== "undefined"){
         window.addEventListener("scroll",()=>{
@@ -35,7 +56,7 @@ const Header:FC<Props> =({activeItem,setOpen, route, setRoute, open})=> {
             setOpenSlidebar(false);
         }
     }
-
+    console.log(user)
   return (
     <div className='w-full relative'>
         <div className={`${active? "dark:bg-opacity-50 dark:bg-gradient-to-b dark:from-gray-900 dark:to-black fixed top-0 left-0 w-full h-[80px] z-[80] border-b dark:border-[#ffffff1c] shadow-xl transition duration-500":"w-full border-b dark:border-[#ffffff1c] h-[80px] z-[80] dark:shadow"}`}>
@@ -51,7 +72,16 @@ const Header:FC<Props> =({activeItem,setOpen, route, setRoute, open})=> {
                         <div className="800px:hidden">
                             <HiOutlineMenuAlt3 size={25} className='cursor-pointer dark:text-white text-black' onClick={()=>setOpenSlidebar((prev)=>!prev)}/>
                         </div>
-                        <HiOutlineUserCircle size={25} className='cursor-pointer dark:text-white text-black hidden 800px:flex' onClick={()=>setOpen((prev)=>!prev)}/>
+                        {
+                            user?(
+                                <>
+                                <Link href={'/profile'}>
+                                <Image className='w-[30px] h-[30px] rounded-full cursor-pointer' src={user.avatar? user.avatar:avatar} alt='user image'/></Link></>
+                            ):(
+
+                                <HiOutlineUserCircle size={25} className='cursor-pointer dark:text-white text-black hidden 800px:flex' onClick={()=>setOpen((prev)=>!prev)}/>
+                            )
+                        }
                     </div>
                 </div>
             </div>
